@@ -18,41 +18,10 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.plugin
+package android.support.design.animation
 
-import android.content.Intent
-import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
-import android.widget.Toast
+import android.animation.TimeInterpolator
 
-/**
- * Activity that's capable of getting EXTRA_OPTIONS input.
- */
-abstract class OptionsCapableActivity : AppCompatActivity() {
-    protected fun pluginOptions(intent: Intent = this.intent) = try {
-        PluginOptions(intent.getStringExtra(PluginContract.EXTRA_OPTIONS))
-    } catch (exc: IllegalArgumentException) {
-        Toast.makeText(this, exc.message, Toast.LENGTH_SHORT).show()
-        PluginOptions()
-    }
-
-    /**
-     * Populate args to your user interface.
-     *
-     * @param options PluginOptions parsed.
-     */
-    protected abstract fun onInitializePluginOptions(options: PluginOptions = pluginOptions())
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val nightMode = intent.getIntExtra(PluginContract.EXTRA_NIGHT_MODE, -100)   // MODE_NIGHT_UNSPECIFIED
-        if (nightMode >= AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && nightMode <= AppCompatDelegate.MODE_NIGHT_YES)
-            AppCompatDelegate.setDefaultNightMode(nightMode)
-        super.onCreate(savedInstanceState)  // applyDayNight is called in AppCompatActivity.onCreate
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        if (savedInstanceState == null) onInitializePluginOptions()
-    }
+object AnimationConsts {
+    val FAST_OUT_SLOW_IN_INTERPOLATOR: TimeInterpolator get() = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
 }

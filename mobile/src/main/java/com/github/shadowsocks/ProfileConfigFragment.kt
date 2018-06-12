@@ -48,9 +48,9 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.takisoft.fix.support.v7.preference.EditTextPreference
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 
-class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenuItemClickListener,
+class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClickListener,
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
@@ -157,11 +157,11 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference.key == Key.pluginConfigure) {
             val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
-            if (intent.resolveActivity(requireContext().packageManager) != null)
-                startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
-                        pluginConfiguration.selectedOptions.toString()), REQUEST_CODE_PLUGIN_CONFIGURE) else {
-                showPluginEditor()
-            }
+            if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else
+                startActivityForResult(intent
+                        .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString())
+                        .putExtra(PluginContract.EXTRA_NIGHT_MODE, DataStore.nightMode),
+                        REQUEST_CODE_PLUGIN_CONFIGURE)
         } else super.onDisplayPreferenceDialog(preference)
     }
 

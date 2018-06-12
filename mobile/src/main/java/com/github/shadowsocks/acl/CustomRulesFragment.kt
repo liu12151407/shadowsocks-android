@@ -22,7 +22,7 @@ package com.github.shadowsocks.acl
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -48,6 +48,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
 import java.net.MalformedURLException
@@ -360,7 +361,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     private lateinit var list: RecyclerView
     private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
-    private val clipboard by lazy { requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    private val clipboard by lazy { requireContext().systemService<ClipboardManager>() }
 
     private fun onSelectedItemsUpdated() {
         if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
@@ -466,10 +467,16 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         val activity = requireActivity()
         val window = activity.window
         // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_300)
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        } else window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_600)
+        // for dark mode, it's roughly 850? (#303030)
+        window.statusBarColor = ContextCompat.getColor(activity, when {
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
+                R.color.md_black_1000
+            Build.VERSION.SDK_INT >= 23 -> {
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                R.color.material_grey_300
+            }
+            else -> R.color.material_grey_600
+        })
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
         toolbar.touchscreenBlocksFocus = true
         return true
