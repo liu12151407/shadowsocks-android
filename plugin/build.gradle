@@ -1,7 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.vanniktech.maven.publish'
 
-apply from: 'gradle-mvn-push.gradle'
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
@@ -10,10 +20,15 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 6
-        versionName "0.1.1"
+        versionCode Integer.parseInt(VERSION_CODE)
+        versionName VERSION_NAME
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.testgetRepositoryPassword().runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility javaVersion
+        targetCompatibility javaVersion
     }
 
     buildTypes {
@@ -23,13 +38,28 @@ android {
     }
 }
 
+androidExtensions {
+    experimental = true
+}
+
+mavenPublish {
+    targets {
+        uploadArchives {
+            releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            repositoryUsername = getRepositoryUsername()
+            repositoryPassword = getRepositoryPassword()
+        }
+    }
+}
+
 dependencies {
-    api "com.android.support:preference-v14:$supportLibraryVersion"
-    api "com.takisoft.fix:preference-v7:$takisoftFixVersion"
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    api 'androidx.core:core-ktx:1.0.2'
+    api 'com.google.android.material:material:1.1.0-alpha06'
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
 }
 repositories {
     mavenCentral()
